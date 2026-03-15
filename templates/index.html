@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Budget Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cherry-red: #750608;
+            --cosmos-marble: #74A5BE;
+            --matcha-green: #BAD797;
+            --off-white: #F9F9F9;
+        }
+
+        body {
+            font-family: 'Instrument Serif', serif;
+            background-color: var(--off-white);
+            color: #333;
+            margin: 0;
+            padding: 40px;
+            font-size: 18px;
+        }
+
+        .container { max-width: 900px; margin: auto; }
+
+        h1 { color: var(--cherry-red); font-size: 3rem; border-bottom: 2px solid var(--cosmos-marble); }
+
+        /* Form Styling */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-left: 10px solid var(--matcha-green);
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid var(--cosmos-marble);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        button {
+            background-color: var(--cherry-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            font-family: 'Instrument Serif', serif; 
+            font-size: 1.0rem;
+        }
+
+        button:hover { opacity: 0.8; }
+
+        .reset-link {
+            text-decoration: none;
+            color: var(--cherry-red);
+            font-weight: bold;
+            border: 1px solid var(--cherry-red);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1.0rem;
+            transition: all 0.3s;
+            display: inline-block; /* Helps the padding look right */
+        }
+
+        .reset-link:hover {
+            background-color: var(--cherry-red);
+            color: white;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th { background-color: var(--cosmos-marble); color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
+
+        .summary-tag {
+            display: inline-block;
+            background: var(--matcha-green);
+            padding: 5px 15px;
+            border-radius: 15px;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn { color: var(--cherry-red); text-decoration: none; font-weight: bold; }
+    
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .input-group label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Makes the update input look cleaner */
+        td input[type="number"] {
+            border: 1px solid var(--matcha-green);
+            border-radius: 4px;
+        }
+
+        /* Makes the save button more subtle until hovered */
+        td button {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Budget Planner⋆⭒˚.⋆</h1>
+
+        <div class="card">
+            <h2>Spending by Category</h2>
+            {% for row in summary %}
+                <span class="summary-tag">{{ row.category }}: ${{ "%.2f"|format(row.total) }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h2>Add New Item</h2>
+            <form action="/add" method="post">
+                <input type="text" name="name" placeholder="Item Name" required>
+                <input type="number" step="0.01" name="cost" placeholder="Cost" required>
+                <input type="text" name="store" placeholder="Store">
+                <select name="category">
+                    {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Add to List</button>
+            </form>
+        </div>
+
+        <div class="card" style="border-left-color: var(--cosmos-marble);">
+            <h2>Filter & Sort</h2>
+            <form action="/" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                <div class="input-group">
+                    <label>Category:</label>
+                    <select name="category">
+                        <option value="All" {% if current_filter == 'All' %}selected{% endif %}>All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if current_filter == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Sort By:</label>
+                    <select name="sort">
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="cost" {% if current_sort == 'cost' %}selected{% endif %}>Highest Price First</option>
+                    </select>
+                </div>
+                
+                <button type="submit" style="background-color: var(--cosmos-marble);">Apply</button>
+                <a href="/" class="reset-link">Reset</a>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Cost</th>
+                    <th>Store</th>
+                    <th>Category</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td>
+                        <form action="/update/{{ item.id }}" method="POST" style="display:inline;">
+                            <input type="number" name="new_cost" value="{{ item.cost }}" step="0.01" style="width: 60px; padding: 2px;">
+                            <button type="submit" style="padding: 2px 8px; font-size: 0.7rem; background: var(--matcha-green); color: #333;">Save</button>
+                        </form>
+                    </td>
+                    <td>{{ item.store }}</td>
+                    <td>{{ item.category }}</td>
+                    <td><a href="/delete/{{ item.id }}" class="delete-btn">Remove</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
