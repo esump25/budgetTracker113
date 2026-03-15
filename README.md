@@ -1,1 +1,7 @@
-# budgetTracker113
+My app tracks budget and shopping habits. I decided to do this because I love shopping, but I frequently lose track of my spending habits. 
+The table I use is a single table named expenses. It has five categories: id(int), item_name(text), cost(real/float), store(text), and category(text). It is important to note that for category, the user is able to pick from a list of categories in order to standardize it: ["Food", "Wellness", "Beauty/Skincare", "Clothing", "Accessories", "Household", "Tech"].
+The easiest way to run my app is to open the files in VS Code or some kind of text editor. Then, run app.py in the terminal. Keep the terminal running while using the app. To use the app, paste the https link outputted into your browser. For example: http://127.0.0.1:5000
+My create operation adds a new row to the expenses table. The user does this by filling out the 'Add New Item' form and then clicking the 'Add to List Button'.
+My read operation allows the user to read and filter their data. It displays all the data on the bottom of the webpage. The user can then filter it by catgeory and sort by newest or price by using the drop downs under the Filter & Sort section. 
+My update operation allows the user to edit the cost of an existing entry in the database. The user does this by clicking the cost, typing in the new entry, and then clicking the 'Save' button. 
+My delete operation permanently removes a specific row from the table. To do this, the user clicks the remove button at the end of the row. 
